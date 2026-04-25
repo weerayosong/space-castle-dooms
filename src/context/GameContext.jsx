@@ -42,6 +42,53 @@ export const GameProvider = ({ children }) => {
         setLogs((prev) => [message, ...prev].slice(0, 10)) // เก็บแค่ 10 log ล่าสุด
     }
 
+    // ฟังก์ชันควบคุมการเดิน
+    const movePlayer = (dx, dy) => {
+        if (isDead || !isStarted) return // ถ้าตายแล้ว หรือยังไม่เริ่มเกม ห้ามเดิน
+
+        const tx = pos.x + dx
+        const ty = pos.y + dy
+
+        // เช็กขอบแผนที่ (กันเหนียว ไม่ให้เดินทะลุกำแพง)
+        if (tx < 0 || tx > 3 || ty < 0 || ty > 3) return
+
+        // คำนวณ O2 ที่ต้องเสีย (ยิ่งลงลึก ยิ่งเหนื่อย)
+        const costMove = Math.min(4, 2 + Math.floor(level / 4))
+
+        // หัก O2 และเช็กว่าตายไหม
+        setO2((prev) => {
+            const newO2 = prev - costMove
+            if (newO2 <= 0) {
+                setIsDead(true) // สั่งให้สถานะเป็น "ตาย"
+                addLog(
+                    <>
+                        ออกซิเจนหมด...{' '}
+                        <span className="text-red-600 font-bold">
+                            คุณจะหายใจยังไงล่ะทีนี้ 555
+                        </span>
+                    </>,
+                )
+            }
+            return Math.max(0, newO2)
+        })
+
+        // อัปเดตพิกัด
+        setPos({ x: tx, y: ty })
+
+        // เปิดหมอกใน Minimap (เพิ่มห้องที่เคยเดินผ่าน)
+        setDiscovered((prev) => {
+            const newSet = new Set(prev)
+            newSet.add(`${tx},${ty}`)
+            return newSet
+        })
+
+        // ลงบันทึก Log
+        const targetRoom = map[`${tx},${ty}`]
+        addLog(
+            `เข้าสู่ ${targetRoom.name} <span className="text-red-500 font-bold">(-${costMove} O<sub>2</sub>)</span>`,
+        )
+    }
+
     // รวมข้อมูลและฟังก์ชันที่จะแชร์
     const value = {
         playerName,
@@ -62,6 +109,7 @@ export const GameProvider = ({ children }) => {
         setDiscovered,
         map,
         setMap,
+        movePlayer,
     }
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>

@@ -1,4 +1,9 @@
+import { useGame } from '../context/GameContext'
+
 const DPad = () => {
+    // ดึงฟังก์ชันและ State มาจาก Context
+    const { pos, movePlayer, discovered } = useGame()
+
     // โครงสร้างปุ่ม 3x3 (N, W, Center, E, S)
     const layout = [
         null,
@@ -26,20 +31,50 @@ const DPad = () => {
                                 key={index}
                                 className="flex flex-col justify-center items-center pointer-events-none opacity-20"
                             >
-                                {/* อนาคตจะใส่ Logic ให้กด ค้นหาได่ ที่นี่ */}
                                 <span className="text-xl font-black font-sans">
                                     !
+                                </span>
+                                <span className="text-[8px] font-bold tracking-widest font-sans uppercase mt-0.5">
+                                    ค้นหา
                                 </span>
                             </button>
                         )
                     }
 
+                    // คำนวณพิกัดเป้าหมาย
+                    const tx = pos.x + btn.dx
+                    const ty = pos.y + btn.dy
+                    const isOutOfBounds = tx < 0 || tx > 3 || ty < 0 || ty > 3
+
+                    // ถ้าเป้าหมายทะลุขอบจอ ให้แสดงปุ่มกากบาท X และกดไม่ได้
+                    if (isOutOfBounds) {
+                        return (
+                            <button
+                                key={index}
+                                disabled
+                                className="border border-gray-100 bg-gray-50 text-gray-300 flex justify-center items-center pointer-events-none rounded-sm opacity-50"
+                            >
+                                <span className="font-sans text-sm font-black">
+                                    X
+                                </span>
+                            </button>
+                        )
+                    }
+
+                    // ถ้าเดินได้ เช็กว่าเคยไปหรือยังเพื่อเปลี่ยนสีปุ่ม
+                    const isKnown = discovered.has(`${tx},${ty}`)
+                    const btnClass = `border flex flex-col justify-center items-center transition-all active:scale-95 select-none rounded-sm ${
+                        isKnown
+                            ? 'border-gray-200 text-gray-400 bg-gray-50 hover:bg-gray-100'
+                            : 'border-gray-300 text-gray-900 bg-white font-bold shadow-sm hover:bg-gray-50'
+                    }`
+
                     // ปุ่มทิศทาง N, S, E, W
                     return (
                         <button
                             key={index}
-                            className="border border-gray-300 text-gray-900 bg-white font-bold shadow-sm hover:bg-gray-50 flex flex-col justify-center items-center transition-all active:scale-95 select-none rounded-sm"
-                            onClick={() => console.log(`เดินไปทาง ${btn.i}`)} // ตอนนี้กดแล้วให้ log ไปก่อน
+                            className={btnClass}
+                            onClick={() => movePlayer(btn.dx, btn.dy)} // สั่งเดิน!
                         >
                             <span className="text-lg font-black font-sans pointer-events-none">
                                 {btn.i}
