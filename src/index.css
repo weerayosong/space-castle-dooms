@@ -1,0 +1,56 @@
+/* นำเข้า Tailwind v4 */
+@import 'tailwindcss';
+
+/* ตั้งค่าฟอนต์ (แทนที่ tailwind.config.js) */
+@theme {
+    --font-sans: 'Noto Sans Thai', sans-serif;
+    --font-mono: ui-monospace, monospace;
+    --font-inter: Inter, sans-serif;
+}
+
+/* CSS พื้นฐาน */
+@layer base {
+    body {
+        @apply font-sans bg-gray-100 text-gray-900 h-dvh w-full flex flex-col select-none touch-manipulation;
+    }
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-beacon {
+    animation: beacon-glow 2s infinite;
+}
+@keyframes beacon-glow {
+    0%,
+    100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 2px;
+}
