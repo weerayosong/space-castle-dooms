@@ -1,4 +1,4 @@
-# Mini #5: Space Castle Dooms | React Game Project
+# [WIP] Mini #5: Space Castle Dooms | React Game Project
 
 ## JavaScript Browser-based Rogue-like game
 
