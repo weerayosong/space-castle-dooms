@@ -25,8 +25,11 @@ function App() {
     }
 
     return (
-        <div className="flex flex-col w-full max-w-md mx-auto h-full border border-gray-200 bg-white sm:rounded-sm shadow-lg relative overflow-hidden">
+        <div className="flex flex-col w-full max-w-md mx-auto h-dvh border border-gray-200 bg-white sm:rounded-sm shadow-lg relative overflow-hidden screen-flicker">
             {/* ... Header, Stage, Logs, DPad, Footer ... */}
+
+            {/* วาง CRT Overlay ไว้เป็นเลเยอร์ทับสุด แต่กดทะลุได้ */}
+            <div className="crt-overlat"></div>
 
             <Header />
 

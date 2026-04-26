@@ -17,7 +17,7 @@ const AchievementsModal = () => {
             {/* ส่วนหัวของ Modal */}
             <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-4 flex-none">
                 <h2 className="text-xl font-black text-gray-900 tracking-widest uppercase font-sans">
-                    ACIEVEMENTS
+                    ACHIEVEMENTS
                 </h2>
                 <button
                     onClick={() => setIsAchvOpen(false)}

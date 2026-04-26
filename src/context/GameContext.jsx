@@ -270,7 +270,7 @@ const ACHIEVEMENTS = [
     { id: 'a29', name: 'Pacifist', desc: 'ลงถึง Deck 3 โดยไม่เจอเอเลี่ยนเลย' },
     {
         id: 'a30',
-        name: 'Platinum Space',
+        name: 'Platinum Space Marine',
         desc: 'ปลดล็อก Achievement ครบ 29 อัน!',
     },
 ]

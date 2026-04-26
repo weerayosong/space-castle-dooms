@@ -1,10 +1,16 @@
 import { useGame } from '../context/GameContext'
 
 const Stage = () => {
-    const { pos, map, discovered, playerName, loopCount, maxDeck } = useGame()
+    const { pos, map, level, discovered, playerName, loopCount, maxDeck } =
+        useGame()
 
     // ดึงข้อมูลห้องปัจจุบันจากพิกัด (x,y)
     const currentRoom = map[`${pos.x},${pos.y}`]
+
+    // คำนวณความยากตามสูตรใน generateMap
+    const hazardRate = Math.min(0.2 + level * 0.02, 0.45)
+    const threatLevel = Math.floor(hazardRate * 100)
+    const extraDmg = Math.min(15, Math.floor(level * 1.5))
 
     // ฟังก์ชันวาด Minimap 4x4
     const renderMinimap = () => {
@@ -47,6 +53,21 @@ const Stage = () => {
                 </div>
                 <div className="text-[8px] font-normal text-gray-500 uppercase font-sans tracking-wider whitespace-nowrap">
                     Lt. {playerName}
+                </div>
+            </div>
+
+            {/* เพิ่มส่วนนี้: มุมซ้ายล่าง (THREAT ANALYSIS) */}
+            <div className="absolute bottom-3 left-3 flex flex-col items-start text-[9px] uppercase font-sans text-gray-400 gap-1">
+                <div className="tracking-widest flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                    THREAT:{' '}
+                    <span className="font-bold text-gray-900">
+                        {threatLevel}%
+                    </span>
+                </div>
+                <div className="tracking-widest">
+                    EST. DMG:{' '}
+                    <span className="font-bold text-gray-900">+{extraDmg}</span>
                 </div>
             </div>
 
