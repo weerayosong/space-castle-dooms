@@ -1,3 +1,4 @@
+import { useRef, useEffect } from 'react'
 import { useGame } from './context/GameContext' // นำเข้า Hook
 import StartScreen from './components/StartScreen'
 import Header from './components/Header'
@@ -10,6 +11,14 @@ import AchievementsModal from './components/AchievementsModal'
 
 function App() {
     const { isStarted, logs } = useGame()
+
+    // 1. สร้างตัวแปรสำหรับปักหมุด
+    const messagesEndRef = useRef(null)
+
+    // 2. สั่งให้เลื่อนจอไปหาหมุด ทุกครั้งที่ตัวแปร logs มีการเปลี่ยนแปลง
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [logs])
 
     if (!isStarted) {
         return <StartScreen />
@@ -25,7 +34,7 @@ function App() {
             <Stage />
 
             {/* พื้นที่แสดงข้อความแจ้งเตือน (Logs) */}
-            <div className="h-32 sm:h-36 flex-none bg-gray-50 border-y border-gray-200 p-4 overflow-y-auto text-[11.5px] leading-relaxed tracking-wide z-10 font-sans text-gray-600 flex flex-col-reverse">
+            <div className="h-32 sm:h-36 flex-none bg-gray-50 border-y border-gray-200 p-4 overflow-y-auto text-[11.5px] leading-relaxed tracking-wide z-10 font-sans text-gray-600 flex">
                 <div>
                     {logs.map((log, index) => (
                         <div
@@ -39,6 +48,9 @@ function App() {
                             <span className="flex-1">{log}</span>
                         </div>
                     ))}
+
+                    {/* 3. วางหมุดล่องหนไว้ตรงบรรทัดสุดท้ายของการวนลูป */}
+                    <div ref={messagesEndRef} />
                 </div>
             </div>
 

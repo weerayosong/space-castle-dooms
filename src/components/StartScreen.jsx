@@ -10,14 +10,17 @@ const StartScreen = () => {
         addLog,
         DB,
         D6,
+        checkAchievements,
+        loopCount,
     } = useGame()
 
     // ปรับ handleStart
     const handleStart = () => {
         const finalName = playerName.trim() || 'yosong'
         setPlayerName(finalName)
-        setMap(generateMap(1)) // สร้างแผนที่ของ Level 1
+        setMap(generateMap(1))
         setIsStarted(true)
+
         addLog(
             <>
                 ระบบพยุงชีพ{' '}
@@ -27,9 +30,19 @@ const StartScreen = () => {
                 เปิดทำงาน... ตื่นจากภาวะจำศีล
             </>,
         )
+
+        checkAchievements('GAME_START', {
+            name: finalName,
+            isLoadSave: loopCount > 1,
+        })
+
+        // ทอยเต๋า 1 ครั้งถ้วน แล้วเก็บค่าไว้ในตัวแปร roll
+        const roll = D6()
+
         addLog(
             <span className="italic text-gray-400">
-                [SYS.D6 : {D6()}] {DB.firstWakeup[D6()](finalName)}
+                {/* เรียกใช้ roll ตัวเดียวกันทั้งสองจุด */}
+                [SYS.D6 : {roll}] {DB.firstWakeup[roll](finalName)}
             </span>,
         )
     }

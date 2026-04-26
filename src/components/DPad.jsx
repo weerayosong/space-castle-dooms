@@ -22,7 +22,7 @@ const DPad = () => {
     ]
 
     return (
-        <div className="flex-none bg-white p-4 pb-5 z-10 flex justify-center w-full">
+        <div className="flex-none bg-slate-200 p-4 pb-5 z-10 flex justify-center w-full">
             <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full max-w-60 aspect-square">
                 {layout.map((btn, index) => {
                     // ถ้าเป็นช่องว่าง (มุมซ้ายบน ขวาบน ซ้ายล่าง ขวาล่าง)

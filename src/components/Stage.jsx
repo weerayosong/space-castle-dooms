@@ -1,7 +1,7 @@
 import { useGame } from '../context/GameContext'
 
 const Stage = () => {
-    const { pos, map, discovered, playerName } = useGame()
+    const { pos, map, discovered, playerName, loopCount, maxDeck } = useGame()
 
     // ดึงข้อมูลห้องปัจจุบันจากพิกัด (x,y)
     const currentRoom = map[`${pos.x},${pos.y}`]
@@ -47,6 +47,22 @@ const Stage = () => {
                 </div>
                 <div className="text-[8px] font-normal text-gray-500 uppercase font-sans tracking-wider whitespace-nowrap">
                     Lt. {playerName}
+                </div>
+            </div>
+
+            {/* ขวาล่าง: แสดงสถิติ Cycle และ Max Deck */}
+            <div className="absolute bottom-3 right-3 flex flex-col items-end text-[9px] uppercase font-sans text-gray-400 text-right gap-1 whitespace-nowrap">
+                <div className="tracking-widest flex items-center gap-2">
+                    CYCLE{' '}
+                    <span className="font-bold text-gray-900 text-[11px]">
+                        {loopCount.toString().padStart(3, '0')}
+                    </span>
+                </div>
+                <div className="tracking-widest flex items-center gap-2">
+                    MAX DECK{' '}
+                    <span className="font-bold text-gray-900 text-[11px]">
+                        {maxDeck.toString().padStart(2, '0')}
+                    </span>
                 </div>
             </div>
 

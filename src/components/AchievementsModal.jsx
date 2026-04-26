@@ -1,8 +1,14 @@
 import { useGame } from '../context/GameContext'
 
 const AchievementsModal = () => {
-    const { isAchvOpen, setIsAchvOpen, ACHIEVEMENTS, unlockedAchv, maxDeck } =
-        useGame()
+    const {
+        isAchvOpen,
+        setIsAchvOpen,
+        ACHIEVEMENTS,
+        unlockedAchv,
+        maxDeck,
+        hardReset,
+    } = useGame()
 
     if (!isAchvOpen) return null
 
@@ -11,7 +17,7 @@ const AchievementsModal = () => {
             {/* ส่วนหัวของ Modal */}
             <div className="flex justify-between items-center border-b border-gray-200 pb-4 mb-4 flex-none">
                 <h2 className="text-xl font-black text-gray-900 tracking-widest uppercase font-sans">
-                    RECORDS
+                    ACIEVEMENTS
                 </h2>
                 <button
                     onClick={() => setIsAchvOpen(false)}
@@ -37,7 +43,7 @@ const AchievementsModal = () => {
             </div>
 
             {/* รายการ Achievements */}
-            <div className="flex-1 overflow-y-auto space-y-2 pr-2 pb-8">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-2 mb-4">
                 {ACHIEVEMENTS.map((a) => {
                     const isUnlocked = unlockedAchv.includes(a.id)
                     return (
@@ -63,6 +69,16 @@ const AchievementsModal = () => {
                         </div>
                     )
                 })}
+            </div>
+
+            {/* --- เพิ่มปุ่มลบเซฟไว้ด้านล่างสุด --- */}
+            <div className="flex-none pt-4 border-t border-gray-200">
+                <button
+                    onClick={hardReset}
+                    className="w-full py-3 border border-red-200 bg-red-50 text-red-600 font-bold text-xs uppercase tracking-widest font-sans hover:bg-red-600 hover:text-white transition-colors rounded-sm"
+                >
+                    [ WIPE ALL MEMORY ]
+                </button>
             </div>
         </div>
     )

@@ -1,4 +1,11 @@
-import { createContext, useState, useContext } from 'react'
+import {
+    createContext,
+    useState,
+    useContext,
+    useEffect,
+    useCallback,
+    useRef,
+} from 'react'
 // **อะไรก็ตามที่คำนวณพร้อมกันได้ใน Event Handler (เช่น ตอนคลิก) ให้ทำตรงนั้นเลย อย่าผลักภาระไปให้ useEffect ช่วยตามเช็กทีหลัง**
 
 // --- 1. ข้อมูลคงที่ (Static Data) ---
@@ -177,143 +184,94 @@ const DB = {
 }
 
 const ACHIEVEMENTS = [
-    {
-        id: 'a1',
-        name: 'First Blood',
-        desc: 'สติสัมปชัญญะดับลงครั้งแรก',
-    },
-    { id: 'a2', name: 'Deja Vu', desc: 'วนลูปมาถึงรอบที่ 5' },
+    // หมวดทั่วไป (General)
+    { id: 'a1', name: 'Awakening', desc: 'ตื่นจากระบบจำศีลครั้งแรก' },
+    { id: 'a2', name: 'True Identity', desc: 'ใส่ชื่อของตัวเองแทน yosong' },
     {
         id: 'a3',
-        name: 'Groundhog Day',
-        desc: 'วนลูปมาถึงรอบที่ 10',
+        name: 'System Error',
+        desc: 'ความทรงจำกลับมา (โหลดเซฟเกมสำเร็จ)',
     },
-    {
-        id: 'a4',
-        name: 'Into the Dark',
-        desc: 'ลงลึกถึง Deck 2',
-    },
-    { id: 'a5', name: 'Deep Dive', desc: 'ลงลึกถึง Deck 5' },
-    {
-        id: 'a6',
-        name: 'Core Explorer',
-        desc: 'ลงลึกถึง Deck 10',
-    },
-    { id: 'a7', name: 'Lucky Find', desc: 'ทอยหาของได้เลข 6' },
-    {
-        id: 'a8',
-        name: 'Rotten Flesh',
-        desc: 'ทอยหาของได้เลข 1',
-    },
-    {
-        id: 'a9',
-        name: 'Perfect Dodge',
-        desc: 'ทอยหลบหลีกได้เลข 6',
-    },
-    {
-        id: 'a10',
-        name: 'Brutal Hit',
-        desc: 'ทอยหลบหลีกได้เลข 1',
-    },
-    {
-        id: 'a11',
-        name: 'Matrix',
-        desc: 'ทอยหลบหลีกได้เลข 6 (2 ครั้งในลูปรอบเดียว)',
-    },
-    {
-        id: 'a12',
-        name: 'Untouchable',
-        desc: 'ทอยหลบหลีกได้เลข 6 (3 ครั้งในลูปรอบเดียว)',
-    },
-    {
-        id: 'a13',
-        name: 'Jackpot',
-        desc: 'ทอยหาของได้เลข 6 (2 ครั้งในลูปรอบเดียว)',
-    },
-    {
-        id: 'a14',
-        name: 'Grave Robber',
-        desc: 'ทอยหาของได้เลข 1 (สะสมครบ 5 ครั้ง)',
-    },
-    {
-        id: 'a15',
-        name: 'Masochist',
-        desc: 'ทอยหลบหลีกได้เลข 1 (สะสมครบ 5 ครั้ง)',
-    },
+
+    // หมวดการตายและวนลูป (Death & Loops)
+    { id: 'a4', name: 'First Blood', desc: 'สติสัมปชัญญะดับลงครั้งแรก' },
+    { id: 'a5', name: 'Asphyxiation', desc: 'ตายเพราะออกซิเจนหมด' },
+    { id: 'a6', name: 'Torn Apart', desc: 'ตายจากการโดนเอเลี่ยนโจมตี' },
+    { id: 'a7', name: 'Deja Vu', desc: 'วนลูปความตายมาถึงรอบที่ 5' },
+    { id: 'a8', name: 'Groundhog Day', desc: 'วนลูปมาถึงรอบที่ 10' },
+    { id: 'a9', name: 'Eternity', desc: 'วนลูปมาถึงรอบที่ 50' },
+
+    // หมวดระดับความลึก (Depth)
+    { id: 'a10', name: 'Into the Dark', desc: 'ลงลิฟต์ลึกถึง Deck 2' },
+    { id: 'a11', name: 'Deep Dive', desc: 'ลงลึกถึง Deck 5' },
+    { id: 'a12', name: 'Core Explorer', desc: 'ลงลึกถึง Deck 10' },
+    { id: 'a13', name: 'The Abyss', desc: 'ลงลึกถึง Deck 20' },
+
+    // หมวดสถานะพยุงชีพ (O2 & Survival)
+    { id: 'a14', name: 'Panic Attack', desc: 'O2 ลดเหลือต่ำกว่า 20%' },
+    { id: 'a15', name: 'Barely Alive', desc: 'O2 ลดเหลือต่ำกว่า 5%' },
     {
         id: 'a16',
-        name: 'Asphyxiation',
-        desc: 'ตายเพราะ O2 หมด (ไม่ได้ตายเพราะโดนโจมตี)',
+        name: 'Breath of Fresh Air',
+        desc: 'ฟื้นฟู O2 กลับมาเต็ม 100%',
     },
-    {
-        id: 'a17',
-        name: 'Torn Apart',
-        desc: 'ตายจากการโดนโจมตี',
-    },
+
+    // หมวดการสำรวจ (Exploration)
+    { id: 'a17', name: 'First Step', desc: 'ก้าวเดินครั้งแรกในอวกาศ' },
     {
         id: 'a18',
-        name: 'Speedrunner',
-        desc: 'เจอทางลงภายใน 3 ก้าว',
+        name: 'Cartographer',
+        desc: 'เดินเปิดแผนที่จนครบ 16 ห้องในชั้นเดียว',
     },
-    {
-        id: 'a19',
-        name: 'Explorer',
-        desc: 'เปิดทุกห้องในชั้นนั้นจนครบ 16 ห้อง',
-    },
+    { id: 'a19', name: 'Brave', desc: 'เดินเข้ารังเอเลี่ยน' },
     {
         id: 'a20',
-        name: 'Barely Alive',
-        desc: 'รอดชีวิตโดยเหลือ O2 ต่ำกว่า 5%',
+        name: 'Coward',
+        desc: 'เดินหนีออกจากห้องที่มีซากปรักหักพังโดยไม่ค้นหา',
     },
-    {
-        id: 'a21',
-        name: 'Miracle Recovery',
-        desc: 'ฟื้นฟู O2 จากต่ำกว่า 20% กลับมามากกว่า 60%',
-    },
-    {
-        id: 'a22',
-        name: 'Hallucinations',
-        desc: 'ทอยเจอความว่างเปล่าเลข 4',
-    },
+
+    // หมวดค้นหาของ (Loot D6)
+    { id: 'a21', name: 'Scavenger', desc: 'ค้นหาของครั้งแรก' },
+    { id: 'a22', name: 'Rotten Flesh', desc: 'ทอยหาของได้เลข 1 (เจอแต่ซาก)' },
     {
         id: 'a23',
-        name: 'Voices',
-        desc: 'ทอยเจอความว่างเปล่าเลข 3',
+        name: 'Lucky Find',
+        desc: 'ทอยหาของได้เลข 6 (แจ็คพอตแคปซูลพยุงชีพ)',
     },
+
+    // หมวดเผชิญหน้าเอเลี่ยน (Hazard D6)
     {
         id: 'a24',
-        name: 'Blood Step',
-        desc: 'ทอยเจอความว่างเปล่าเลข 2',
+        name: 'Brutal Hit',
+        desc: 'ทอยโดนเอเลี่ยนโจมตีได้เลข 1 (บาดเจ็บหนัก)',
     },
     {
         id: 'a25',
-        name: 'Panic Attack',
-        desc: "หัวใจเต้นระดับ 'วิกฤต'",
+        name: 'Perfect Dodge',
+        desc: 'ทอยหลบเอเลี่ยนได้เลข 6 (ไร้รอยขีดข่วน)',
     },
     {
         id: 'a26',
-        name: 'Hoarder',
-        desc: 'ค้นหาไอเทมสะสมครบ 10 ครั้ง',
+        name: 'Survivor',
+        desc: 'รอดจากเอเลี่ยนโดยที่ O2 เหลือน้อยกว่า 10%',
     },
+
+    // หมวดท้าทายพิเศษ (Challenges)
     {
         id: 'a27',
-        name: 'Scavenger',
-        desc: 'ค้นหาไอเทมสะสมครบ 50 ครั้ง',
+        name: 'Speedrunner',
+        desc: 'เจอทางลงภายใน 3 ก้าว (รันในจิตนาการไปก่อน)',
     },
     {
         id: 'a28',
-        name: 'Xenobiologist',
-        desc: 'ปะทะเอเลี่ยนสะสมครบ 20 ครั้ง',
+        name: 'Lost in Space',
+        desc: 'เดินวนไปมาเกิน 20 ก้าวในชั้นเดียว',
     },
-    {
-        id: 'a29',
-        name: 'Endless Nightmare',
-        desc: 'วนลูปมาถึงรอบที่ 20',
-    },
+    { id: 'a29', name: 'Pacifist', desc: 'ลงถึง Deck 3 โดยไม่เจอเอเลี่ยนเลย' },
     {
         id: 'a30',
-        name: 'True Dooms',
-        desc: 'ลงลึกถึง Deck 20 (เกือบเป็นไปไม่ได้)',
+        name: 'Platinum Space',
+        desc: 'ปลดล็อก Achievement ครบ 29 อัน!',
     },
 ]
 
@@ -349,26 +307,186 @@ const GameContext = createContext()
 // 2a. สร้าง Provider (ตัวห่อหุ้มที่จะส่งข้อมูลให้ Component ลูก)
 export const GameProvider = ({ children }) => {
     // --- Game States ---
-    const [playerName, setPlayerName] = useState('Yosong')
+    const [playerName, setPlayerName] = useState('yosong')
     const [level, setLevel] = useState(1)
     const [o2, setO2] = useState(100)
     const [isDead, setIsDead] = useState(false)
     const [isStarted, setIsStarted] = useState(false)
     const [logs, setLogs] = useState([])
     const [isTransitioning, setIsTransitioning] = useState(false) // เพิ่ม State ใหม่ at phase8
-    const [maxDeck, setMaxDeck] = useState(1)
-    const [unlockedAchv, setUnlockedAchv] = useState([])
+    // const [maxDeck, setMaxDeck] = useState(1)
+    // const [unlockedAchv, setUnlockedAchv] = useState([])
     const [isAchvOpen, setIsAchvOpen] = useState(false) // สำหรับเปิด/ปิด Modal
+    // --- phase11 เปลี่ยนมาดึงข้อมูลเซฟจาก LocalStorage ---
+    const [loopCount, setLoopCount] = useState(() => {
+        const saved = localStorage.getItem('sc_loopCount')
+        return saved ? parseInt(saved) : 1
+    })
+
+    const [maxDeck, setMaxDeck] = useState(() => {
+        const saved = localStorage.getItem('sc_maxDeck')
+        return saved ? parseInt(saved) : 1
+    })
+
+    const [unlockedAchv, setUnlockedAchv] = useState(() => {
+        const saved = localStorage.getItem('sc_unlockedAchv')
+        return saved ? JSON.parse(saved) : []
+    })
 
     // --- Game Map States ---
     const [pos, setPos] = useState({ x: 0, y: 0 })
     const [discovered, setDiscovered] = useState(new Set(['0,0']))
     const [map, setMap] = useState({}) // ค่าเริ่มต้นว่างเปล่า จะสร้างตอนกด Start
 
+    // --- ระบบ Auto-Save (เซฟทันทีเมื่อข้อมูลเปลี่ยน) ---
+    useEffect(() => {
+        localStorage.setItem('sc_loopCount', loopCount)
+        localStorage.setItem('sc_maxDeck', maxDeck)
+        localStorage.setItem('sc_unlockedAchv', JSON.stringify(unlockedAchv))
+    }, [loopCount, maxDeck, unlockedAchv])
+
     // ฟังก์ชันพื้นฐานสำหรับเพิ่ม Log
-    const addLog = (message) => {
-        setLogs((prev) => [message, ...prev].slice(0, 10)) // เก็บแค่ 10 log ล่าสุด
-    }
+    const addLog = useCallback((message) => {
+        // // ห่อหุ้ม addLog (ไม่ต้องมี dependencies เพราะใช้แค่ prev state)
+        setLogs((prev) => [...prev, message].slice(-15))
+    }, [])
+
+    // ฟังก์ชันปลดล็อก Achievement
+    const unlockAchv = useCallback((id) => {
+        setUnlockedAchv((prev) => {
+            if (!prev.includes(id)) {
+                return [...prev, id] // แค่บันทึกว่าปลดล็อกแล้ว ไม่ต้องทำอย่างอื่นเลย
+            }
+            return prev
+        })
+    }, []) // <--- เอา addLog ออกจากวงเล็บเหลี่ยมด้วย
+
+    // --- ระบบแจ้งเตือน Achievement และแจกถ้วย Platinum ---
+    const prevUnlockedRef = useRef(unlockedAchv) // สร้างความทรงจำไว้เทียบ
+
+    useEffect(() => {
+        // ถ้าจำนวน Achievement ปัจจุบัน มากกว่าในความทรงจำ
+        if (unlockedAchv.length > prevUnlockedRef.current.length) {
+            // หาว่าอันไหนที่เพิ่มมาใหม่
+            const newAchvs = unlockedAchv.filter(
+                (id) => !prevUnlockedRef.current.includes(id),
+            )
+
+            // วนลูปแจ้งเตือนอันใหม่
+            newAchvs.forEach((id) => {
+                const ach = ACHIEVEMENTS.find((a) => a.id === id)
+                addLog(
+                    <>
+                        <span className="font-bold text-gray-100 bg-gray-900 px-2 rounded-sm inline-block tracking-widest mt-1">
+                            [SYS.ACHV] {ach?.name} UNLOCKED
+                        </span>
+                    </>,
+                )
+            })
+
+            // --- ความลับระดับ Platinum ---
+            if (unlockedAchv.length === 29 && !unlockedAchv.includes('a30')) {
+                setTimeout(() => unlockAchv('a30'), 1500)
+            }
+        }
+
+        // อัปเดตความทรงจำให้เป็นปัจจุบัน
+        prevUnlockedRef.current = unlockedAchv
+    }, [unlockedAchv, addLog, unlockAchv]) // จับตาดูเฉพาะตอนที่ unlockedAchv เปลี่ยนแปลง
+
+    // ศูนย์กลางตรวจจับความสำเร็จ (Centralized Evaluator)
+    const checkAchievements = useCallback(
+        (eventName, data) => {
+            switch (eventName) {
+                case 'GAME_START':
+                    unlockAchv('a1') // ตื่นครั้งแรก
+                    if (data.name !== 'yosong') unlockAchv('a2') // ใส่ชื่อตัวเอง
+                    if (data.isLoadSave) unlockAchv('a3') // มีเซฟ
+                    break
+
+                case 'MOVE':
+                    unlockAchv('a17') // เดินครั้งแรก
+                    if (data.targetType === 'hazard') unlockAchv('a19') // เข้าห้องเอเลี่ยน
+                    if (data.leftUnsearchedLoot) unlockAchv('a20') // เดินหนีของ
+                    if (data.discoveredCount === 16) unlockAchv('a18') // เปิดแมพครบ
+                    break
+
+                case 'O2_CHANGE':
+                    if (data.o2 <= 20) unlockAchv('a14')
+                    if (data.o2 <= 5 && data.o2 > 0) unlockAchv('a15')
+                    if (data.o2 === 100) unlockAchv('a16')
+                    break
+
+                case 'DEATH':
+                    unlockAchv('a4') // ตายครั้งแรก
+                    if (data.cause === 'O2_EMPTY') unlockAchv('a5')
+                    if (data.cause === 'HAZARD') unlockAchv('a6')
+                    break
+
+                case 'DEATH_LOOP':
+                    if (data.loop >= 5) unlockAchv('a7')
+                    if (data.loop >= 10) unlockAchv('a8')
+                    if (data.loop >= 50) unlockAchv('a9')
+                    break
+
+                case 'LEVEL_UP':
+                    if (data.level >= 2) unlockAchv('a10')
+                    if (data.level >= 5) unlockAchv('a11')
+                    if (data.level >= 10) unlockAchv('a12')
+                    if (data.level >= 20) unlockAchv('a13')
+                    break
+
+                case 'SEARCH_LOOT':
+                    unlockAchv('a21')
+                    if (data.roll === 1) unlockAchv('a22')
+                    if (data.roll === 6) unlockAchv('a23')
+                    break
+
+                case 'HAZARD_ROLL':
+                    if (data.roll === 1) unlockAchv('a24')
+                    if (data.roll === 6) unlockAchv('a25')
+                    if (data.o2After < 10 && data.o2After > 0) unlockAchv('a26')
+                    break
+
+                default:
+                    break
+            }
+        },
+        [unlockAchv],
+    )
+
+    // --- ระบบล้างความทรงจำ (Hard Reset) ---
+    const hardReset = useCallback(() => {
+        // ใช้ confirm ของเบราว์เซอร์เพื่อถามย้ำความมั่นใจ
+        if (
+            window.confirm(
+                '⚠️ คำเตือน: ระบบจะทำการล้างความทรงจำ สถิติ และ Achievements ทั้งหมด คุณต้องการดำเนินการต่อหรือไม่?',
+            )
+        ) {
+            // 1. ลบข้อมูลใน LocalStorage ทิ้งทั้งหมด
+            localStorage.removeItem('sc_loopCount')
+            localStorage.removeItem('sc_maxDeck')
+            localStorage.removeItem('sc_unlockedAchv')
+
+            // 2. รีเซ็ต State ในหน้าจอให้กลับเป็นค่าเริ่มต้นทันที
+            setLoopCount(1)
+            setMaxDeck(1)
+            setUnlockedAchv([])
+
+            // 3. แจ้งเตือนใน Log
+            addLog(
+                <>
+                    <span className="text-red-600 font-bold tracking-widest">
+                        [SYS.WIPE] ล้างความทรงจำเสร็จสิ้น... รีบูตระบบ...
+                    </span>
+                </>,
+            )
+
+            // 4. (ทางเลือก) เด้งกลับไปหน้า Start Screen
+            setIsStarted(false)
+            setIsAchvOpen(false)
+        }
+    }, [addLog])
 
     // --- 3. ฟังก์ชันระบบเกม (Search & Move) ---
     const searchRoom = () => {
@@ -410,6 +528,9 @@ export const GameProvider = ({ children }) => {
                 content: '',
             },
         }))
+        // Trigger ACHV
+        checkAchievements('SEARCH_LOOT', { roll: roll })
+        checkAchievements('O2_CHANGE', { o2: nextO2 })
 
         addLog(
             <>
@@ -427,28 +548,45 @@ export const GameProvider = ({ children }) => {
 
     // ฟังก์ชันควบคุมการเดิน
     const movePlayer = (dx, dy) => {
-        if (isDead || !isStarted || isTransitioning) return // ถ้าตายแล้ว หรือยังไม่เริ่มเกม ห้ามเดิน // เพิ่มเช็ก isTransitioning at phase8
+        // 1. เช็กสถานะเกมก่อนเลย
+        if (isDead || !isStarted || isTransitioning) return
 
+        // 2. คำนวณพิกัดใหม่
         const tx = pos.x + dx
         const ty = pos.y + dy
 
-        // เช็กขอบแผนที่ (กันเหนียว ไม่ให้เดินทะลุกำแพง)
+        // 3. เช็กขอบแผนที่
         if (tx < 0 || tx > 3 || ty < 0 || ty > 3) return
 
-        // จะไม่ใช้จะไม่ใช้ dummyMap ละ
+        // 4. ดึงข้อมูลห้องปัจจุบัน และ ห้องเป้าหมาย
+        const currentRoom = map[`${pos.x},${pos.y}`]
         const targetRoom = map[`${tx},${ty}`]
-        // คำนวณ O2 ที่ต้องเสีย (ยิ่งลงลึก ยิ่งเหนื่อย)
+        const leftUnsearched =
+            currentRoom?.type === 'loot' && !currentRoom.searched
+
+        // 5. Trigger ACHV หมวดการเดิน (วางตรงนี้ปลอดภัย 100% เพราะรู้จัก tx, ty, targetRoom แล้ว)
+        checkAchievements('MOVE', {
+            targetType: targetRoom.type,
+            leftUnsearchedLoot: leftUnsearched,
+            discoveredCount:
+                discovered.size + (discovered.has(`${tx},${ty}`) ? 0 : 1),
+        })
+
+        // 6. ลอจิกการเดิน (ดาเมจ เอเลี่ยน ทางลง ฯลฯ)
         const costMove = Math.min(4, 2 + Math.floor(level / 4))
-        // ดาเมจจาก data ข้างบน ไว้เล่นต่อ
         let damage = 0
 
-        // ห้องที่เล่นกับค่า damage คือ 'hazard'
         if (targetRoom.type === 'hazard') {
             const roll = D6()
             const outcome = DB.hazard[roll]
             const extraDmg =
                 roll === 6 ? 0 : Math.min(15, Math.floor(level * 1.5))
             damage = outcome.dmg + extraDmg
+
+            checkAchievements('HAZARD_ROLL', {
+                roll: roll,
+                o2After: o2 - costMove - damage,
+            })
 
             addLog(
                 <>
@@ -473,7 +611,6 @@ export const GameProvider = ({ children }) => {
                 800,
             )
             setTimeout(() => addLog(outcome.seq[2]), 1600)
-            // phase8 extit elevator(lift)
         } else if (targetRoom.type === 'exit') {
             addLog(
                 <>
@@ -483,8 +620,8 @@ export const GameProvider = ({ children }) => {
                     </span>
                 </>,
             )
-            goToNextLevel() // เรียกใช้ฟังก์ชันเปลี่ยนชั้น
-            return // ออกจากการทำงานทันที
+            goToNextLevel()
+            return
         } else {
             if (targetRoom.name === '[ โถงทางเดิน ]') {
                 const roll = D6()
@@ -497,24 +634,31 @@ export const GameProvider = ({ children }) => {
                 addLog(`เข้าสู่ ${targetRoom.name}...`)
             }
         }
-        // ในเฟส 7 - setO2 >> nextO2
-        // คำนวณ O2 ล่วงหน้า
-        const nextO2 = Math.max(0, o2 - costMove - damage)
-        setO2(nextO2) // อัปเดต O2
 
-        // เช็กความตายทันทีหลังโดนดาเมจ!
+        // 7. สรุปผล O2 และเช็กความตาย
+        const nextO2 = Math.max(0, o2 - costMove - damage)
+        setO2(nextO2)
+
+        // จัดการ If ซ้อน If ให้เหลือชั้นเดียว และแยก O2_CHANGE มาไว้อีกฝั่ง
         if (nextO2 <= 0 && o2 > 0) {
             setIsDead(true)
+            checkAchievements('DEATH', {
+                cause: damage > 0 ? 'HAZARD' : 'O2_EMPTY',
+            })
             addLog(
                 <>
                     ออกซิเจนหมด...{' '}
                     <span className="text-red-600 font-bold">
-                        สติสัมปชัญญะดับลง
+                        สติสัมปชัญญะ ..ดับลง
                     </span>
                 </>,
             )
+        } else {
+            // ถ้ายังไม่ตาย ให้เช็ก Achievement หมวด O2 ลด
+            checkAchievements('O2_CHANGE', { o2: nextO2 })
         }
 
+        // 8. อัปเดตพิกัด
         setPos({ x: tx, y: ty })
         setDiscovered((prev) => new Set(prev).add(`${tx},${ty}`))
     }
@@ -523,23 +667,21 @@ export const GameProvider = ({ children }) => {
     // --- ฟังก์ชันลงลิฟต์ไปชั้นต่อไป ---
     const goToNextLevel = () => {
         if (isDead || isTransitioning) return
-
-        setIsTransitioning(true) // เริ่มการเปลี่ยนฉาก
+        setIsTransitioning(true)
         const nextLevel = level + 1
 
-        // หน่วงเวลา 3.5 วินาทีเพื่อให้ผู้เล่นดูหน้าจอ Transition (เหมือนในเวอร์ชัน HTML)
+        checkAchievements('LEVEL_UP', { level: nextLevel })
+
+        // อัปเดตสถิติชั้นที่ลึกที่สุด
+        if (nextLevel > maxDeck) setMaxDeck(nextLevel)
+
         setTimeout(() => {
             setLevel(nextLevel)
             setPos({ x: 0, y: 0 })
             setDiscovered(new Set(['0,0']))
-
-            // สร้างแผนที่ใหม่ที่ยากขึ้น (hazardRate จะสูงขึ้นตาม Level ใน generateMap)
             setMap(generateMap(nextLevel))
-
-            // ฟื้น O2 ให้ 30% เป็นโบนัสที่รอดมาได้ แต่ไม่เกิน 100
             setO2((prev) => Math.min(100, prev + 30))
-
-            setIsTransitioning(false) // จบการเปลี่ยนฉาก
+            setIsTransitioning(false)
             addLog(
                 <>
                     --- ลงมาถึง{' '}
@@ -550,26 +692,6 @@ export const GameProvider = ({ children }) => {
                 </>,
             )
         }, 3500)
-    }
-
-    // ฟังก์ชันปลดล็อก Achievement
-    const unlockAchv = (id) => {
-        setUnlockedAchv((prev) => {
-            // ถ้ายังไม่เคยปลดล็อก
-            if (!prev.includes(id)) {
-                const ach = ACHIEVEMENTS.find((a) => a.id === id)
-                // แสดง Log แจ้งเตือน
-                addLog(
-                    <>
-                        <span className="font-bold text-gray-100 bg-gray-900 px-2 rounded-sm inline-block tracking-widest">
-                            [SYS.ACHV] {ach?.name} UNLOCKED
-                        </span>
-                    </>,
-                )
-                return [...prev, id]
-            }
-            return prev
-        })
     }
 
     // รวมข้อมูลและฟังก์ชันที่จะแชร์
@@ -609,6 +731,11 @@ export const GameProvider = ({ children }) => {
         unlockAchv,
         isAchvOpen,
         setIsAchvOpen,
+        // phase11
+        loopCount,
+        setLoopCount,
+        checkAchievements,
+        hardReset,
     }
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>

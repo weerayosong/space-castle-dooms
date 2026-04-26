@@ -9,6 +9,9 @@ const DeathScreen = () => {
         setPos,
         setDiscovered,
         addLog,
+        setLoopCount,
+        loopCount,
+        checkAchievements,
     } = useGame()
 
     // ถ้ายังไม่ตาย ก็ไม่ต้องเรนเดอร์อะไรออกมา (คืนค่า null)
@@ -20,6 +23,14 @@ const DeathScreen = () => {
         setO2(100)
         setPos({ x: 0, y: 0 })
         setDiscovered(new Set(['0,0']))
+
+        // คำนวณ Loop ล่วงหน้า และสั่งอัปเดตแค่รอบเดียว!
+        const nextLoop = loopCount + 1
+        setLoopCount(nextLoop)
+
+        checkAchievements('DEATH_LOOP', { loop: nextLoop })
+        checkAchievements('O2_CHANGE', { o2: 100 }) // ตื่นมา O2 เต็ม 100
+
         addLog(
             <>
                 ตื่นขึ้นมาอีกครั้ง...{' '}
