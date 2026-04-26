@@ -62,7 +62,12 @@ const Stage = () => {
                         {currentRoom.content || ''}
                     </div>
                     <div className="h-4 flex items-center justify-center">
-                        {/* พื้นที่สำหรับขึ้นคำว่า [ ค้นหาแล้ว ] ในอนาคค */}
+                        {currentRoom.type === 'loot' &&
+                            currentRoom.searched && (
+                                <span className="text-[10px] font-bold text-gray-400 tracking-widest">
+                                    [ ค้นหาแล้ว ]
+                                </span>
+                            )}
                     </div>
                 </div>
             )}

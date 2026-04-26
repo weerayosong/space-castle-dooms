@@ -2,7 +2,11 @@ import { useGame } from '../context/GameContext'
 
 const DPad = () => {
     // ดึงฟังก์ชันและ State มาจาก Context
-    const { pos, movePlayer, discovered } = useGame()
+    const { pos, movePlayer, discovered, map, searchRoom } = useGame()
+
+    // เช็กว่าห้องปัจจุบันค้นหาได้ไหม
+    const currentRoom = map[`${pos.x},${pos.y}`]
+    const canSearch = currentRoom?.type === 'loot' && !currentRoom.searched
 
     // โครงสร้างปุ่ม 3x3 (N, W, Center, E, S)
     const layout = [
@@ -29,12 +33,17 @@ const DPad = () => {
                         return (
                             <button
                                 key={index}
-                                className="flex flex-col justify-center items-center pointer-events-none opacity-20"
+                                onClick={canSearch ? searchRoom : undefined}
+                                className={
+                                    canSearch
+                                        ? 'border border-gray-300 font-bold flex flex-col justify-center items-center transition-transform active:scale-95 select-none bg-gray-50 text-gray-900 shadow-sm rounded-sm hover:bg-gray-100'
+                                        : 'flex flex-col justify-center items-center pointer-events-none opacity-20'
+                                }
                             >
-                                <span className="text-xl font-black font-sans">
+                                <span className="text-xl font-black font-sans pointer-events-none">
                                     !
                                 </span>
-                                <span className="text-[8px] font-bold tracking-widest font-sans uppercase mt-0.5">
+                                <span className="text-[8px] font-bold tracking-widest font-sans uppercase mt-0.5 pointer-events-none">
                                     ค้นหา
                                 </span>
                             </button>

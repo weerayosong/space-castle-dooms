@@ -7,3 +7,7 @@
 - Training with Hooks (I'll use useState, useEffect and useContext for this Project)
 - Apply use of CSS with Tailwind CSS v4
 - Apply use of JS in game logics, and play with data in Array and Object
+
+### Reminders:
+
+- อะไรก็ตามที่คำนวณพร้อมกันได้ใน Event Handler (เช่น ตอนคลิก) ให้ทำตรงนั้นเลย อย่าผลักภาระไปให้ useEffect ช่วยตามเช็กทีหลัง

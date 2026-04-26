@@ -1,15 +1,39 @@
 import { useGame } from '../context/GameContext'
 
 const StartScreen = () => {
-    const { setPlayerName, setIsStarted, playerName } = useGame()
+    const {
+        setPlayerName,
+        setIsStarted,
+        playerName,
+        setMap,
+        generateMap,
+        addLog,
+        DB,
+        D6,
+    } = useGame()
 
+    // ปรับ handleStart
     const handleStart = () => {
-        // ถ้าไม่ได้กรอกชื่อ ให้ใช้ yosong as a default
-        if (!playerName.trim()) {
-            setPlayerName('yosong')
-        }
+        const finalName = playerName.trim() || 'yosong'
+        setPlayerName(finalName)
+        setMap(generateMap(1)) // สร้างแผนที่ของ Level 1
         setIsStarted(true)
+        addLog(
+            <>
+                ระบบพยุงชีพ{' '}
+                <span className="font-black">
+                    (O<sub>2</sub>)
+                </span>{' '}
+                เปิดทำงาน... ตื่นจากภาวะจำศีล
+            </>,
+        )
+        addLog(
+            <span className="italic text-gray-400">
+                [SYS.D6 : {D6()}] {DB.firstWakeup[D6()](finalName)}
+            </span>,
+        )
     }
+    // อย่าลืม! นำเข้า setMap, generateMap, addLog, DB, D6 มาจาก useGame()
 
     return (
         <div className="absolute inset-0 bg-gray-950 z-50 flex flex-col overflow-hidden fade-in text-gray-100">
