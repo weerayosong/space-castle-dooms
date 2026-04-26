@@ -6,6 +6,7 @@ import Stage from './components/Stage'
 import DPad from './components/DPad'
 import TransitionScreen from './components/TransitionScreen'
 import DeathScreen from './components/DeathScreen'
+import AchievementsModal from './components/AchievementsModal'
 
 function App() {
     const { isStarted, logs } = useGame()
@@ -49,6 +50,7 @@ function App() {
             {/* หน้าจอพิเศษต่างๆ */}
             <TransitionScreen />
             <DeathScreen />
+            <AchievementsModal />
         </div>
     )
 }

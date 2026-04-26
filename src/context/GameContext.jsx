@@ -176,6 +176,147 @@ const DB = {
     },
 }
 
+const ACHIEVEMENTS = [
+    {
+        id: 'a1',
+        name: 'First Blood',
+        desc: 'สติสัมปชัญญะดับลงครั้งแรก',
+    },
+    { id: 'a2', name: 'Deja Vu', desc: 'วนลูปมาถึงรอบที่ 5' },
+    {
+        id: 'a3',
+        name: 'Groundhog Day',
+        desc: 'วนลูปมาถึงรอบที่ 10',
+    },
+    {
+        id: 'a4',
+        name: 'Into the Dark',
+        desc: 'ลงลึกถึง Deck 2',
+    },
+    { id: 'a5', name: 'Deep Dive', desc: 'ลงลึกถึง Deck 5' },
+    {
+        id: 'a6',
+        name: 'Core Explorer',
+        desc: 'ลงลึกถึง Deck 10',
+    },
+    { id: 'a7', name: 'Lucky Find', desc: 'ทอยหาของได้เลข 6' },
+    {
+        id: 'a8',
+        name: 'Rotten Flesh',
+        desc: 'ทอยหาของได้เลข 1',
+    },
+    {
+        id: 'a9',
+        name: 'Perfect Dodge',
+        desc: 'ทอยหลบหลีกได้เลข 6',
+    },
+    {
+        id: 'a10',
+        name: 'Brutal Hit',
+        desc: 'ทอยหลบหลีกได้เลข 1',
+    },
+    {
+        id: 'a11',
+        name: 'Matrix',
+        desc: 'ทอยหลบหลีกได้เลข 6 (2 ครั้งในลูปรอบเดียว)',
+    },
+    {
+        id: 'a12',
+        name: 'Untouchable',
+        desc: 'ทอยหลบหลีกได้เลข 6 (3 ครั้งในลูปรอบเดียว)',
+    },
+    {
+        id: 'a13',
+        name: 'Jackpot',
+        desc: 'ทอยหาของได้เลข 6 (2 ครั้งในลูปรอบเดียว)',
+    },
+    {
+        id: 'a14',
+        name: 'Grave Robber',
+        desc: 'ทอยหาของได้เลข 1 (สะสมครบ 5 ครั้ง)',
+    },
+    {
+        id: 'a15',
+        name: 'Masochist',
+        desc: 'ทอยหลบหลีกได้เลข 1 (สะสมครบ 5 ครั้ง)',
+    },
+    {
+        id: 'a16',
+        name: 'Asphyxiation',
+        desc: 'ตายเพราะ O2 หมด (ไม่ได้ตายเพราะโดนโจมตี)',
+    },
+    {
+        id: 'a17',
+        name: 'Torn Apart',
+        desc: 'ตายจากการโดนโจมตี',
+    },
+    {
+        id: 'a18',
+        name: 'Speedrunner',
+        desc: 'เจอทางลงภายใน 3 ก้าว',
+    },
+    {
+        id: 'a19',
+        name: 'Explorer',
+        desc: 'เปิดทุกห้องในชั้นนั้นจนครบ 16 ห้อง',
+    },
+    {
+        id: 'a20',
+        name: 'Barely Alive',
+        desc: 'รอดชีวิตโดยเหลือ O2 ต่ำกว่า 5%',
+    },
+    {
+        id: 'a21',
+        name: 'Miracle Recovery',
+        desc: 'ฟื้นฟู O2 จากต่ำกว่า 20% กลับมามากกว่า 60%',
+    },
+    {
+        id: 'a22',
+        name: 'Hallucinations',
+        desc: 'ทอยเจอความว่างเปล่าเลข 4',
+    },
+    {
+        id: 'a23',
+        name: 'Voices',
+        desc: 'ทอยเจอความว่างเปล่าเลข 3',
+    },
+    {
+        id: 'a24',
+        name: 'Blood Step',
+        desc: 'ทอยเจอความว่างเปล่าเลข 2',
+    },
+    {
+        id: 'a25',
+        name: 'Panic Attack',
+        desc: "หัวใจเต้นระดับ 'วิกฤต'",
+    },
+    {
+        id: 'a26',
+        name: 'Hoarder',
+        desc: 'ค้นหาไอเทมสะสมครบ 10 ครั้ง',
+    },
+    {
+        id: 'a27',
+        name: 'Scavenger',
+        desc: 'ค้นหาไอเทมสะสมครบ 50 ครั้ง',
+    },
+    {
+        id: 'a28',
+        name: 'Xenobiologist',
+        desc: 'ปะทะเอเลี่ยนสะสมครบ 20 ครั้ง',
+    },
+    {
+        id: 'a29',
+        name: 'Endless Nightmare',
+        desc: 'วนลูปมาถึงรอบที่ 20',
+    },
+    {
+        id: 'a30',
+        name: 'True Dooms',
+        desc: 'ลงลึกถึง Deck 20 (เกือบเป็นไปไม่ได้)',
+    },
+]
+
 const generateMap = (currentLevel) => {
     let m = {}
     const ex = Math.floor(Math.random() * 2) + 2,
@@ -215,6 +356,9 @@ export const GameProvider = ({ children }) => {
     const [isStarted, setIsStarted] = useState(false)
     const [logs, setLogs] = useState([])
     const [isTransitioning, setIsTransitioning] = useState(false) // เพิ่ม State ใหม่ at phase8
+    const [maxDeck, setMaxDeck] = useState(1)
+    const [unlockedAchv, setUnlockedAchv] = useState([])
+    const [isAchvOpen, setIsAchvOpen] = useState(false) // สำหรับเปิด/ปิด Modal
 
     // --- Game Map States ---
     const [pos, setPos] = useState({ x: 0, y: 0 })
@@ -408,6 +552,26 @@ export const GameProvider = ({ children }) => {
         }, 3500)
     }
 
+    // ฟังก์ชันปลดล็อก Achievement
+    const unlockAchv = (id) => {
+        setUnlockedAchv((prev) => {
+            // ถ้ายังไม่เคยปลดล็อก
+            if (!prev.includes(id)) {
+                const ach = ACHIEVEMENTS.find((a) => a.id === id)
+                // แสดง Log แจ้งเตือน
+                addLog(
+                    <>
+                        <span className="font-bold text-gray-100 bg-gray-900 px-2 rounded-sm inline-block tracking-widest">
+                            [SYS.ACHV] {ach?.name} UNLOCKED
+                        </span>
+                    </>,
+                )
+                return [...prev, id]
+            }
+            return prev
+        })
+    }
+
     // รวมข้อมูลและฟังก์ชันที่จะแชร์
     const value = {
         playerName,
@@ -434,9 +598,17 @@ export const GameProvider = ({ children }) => {
         DB,
         generateMap,
         D6,
-        //phase8
+        // phase8
         isTransitioning,
         goToNextLevel,
+        // phase10
+        ACHIEVEMENTS,
+        maxDeck,
+        setMaxDeck,
+        unlockedAchv,
+        unlockAchv,
+        isAchvOpen,
+        setIsAchvOpen,
     }
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>
