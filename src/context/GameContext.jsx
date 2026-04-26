@@ -47,7 +47,7 @@ const DB = {
         3: () => 'มืดสนิท... พลังงานหลักดับไปตั้งแต่เมื่อไหร่...',
         4: () => 'กลิ่นคาวเลือด... ต้องรีบหาทางหนี!',
         5: () => 'แคปซูลเปิดฉุกเฉิน... ทุกคนหายไปไหนหมด...',
-        6: (name) => `ใจเย็นไว้ Lt. ${name}... ต้องรอดไปให้ได้!`,
+        6: (name) => `Lt. ${name}... เตรียมพร้อม ประเมินสถานการณ์!`,
     },
     wakeup: {
         1: () => 'ทำไมแคปซูลเปิดออกเอง... ฉันหลับไปนานแค่ไหน...',
@@ -127,8 +127,8 @@ const DB = {
     hazard: {
         1: {
             seq: [
-                'เงาสูงพุ่งทะลุเพดาน!',
-                'กรงเล็บมันเจาะชุดฉัน!',
+                'ตัวเต็มวัย? มันลงมาจากช่องเพดาน!',
+                'ไม่นะ! กรงเล็บมันเจาะชุดฉัน!',
                 'เลือดไหลอาบ... คุณหนีออกมา',
             ],
             dmg: 25,
@@ -143,7 +143,7 @@ const DB = {
         },
         3: {
             seq: [
-                'พื้นยุบตัว ตกสู่รัง!',
+                'พื้นยุบตัว! ..ตกสู่รัง!',
                 'ปล่อยนะเว้ย!',
                 'ยิงพลาสมาสกัด ปีนหนีออกมาได้',
             ],
@@ -167,8 +167,8 @@ const DB = {
         },
         6: {
             seq: [
-                'มันพุ่งเข้าใส่!',
-                'กินพลาสมาไปซะ!',
+                'มัน..พุ่งเข้าใส่!',
+                'กิน พลาสมา ไปซะ!',
                 'ยิงสกัด สไลด์หลบเข้าประตูได้ทัน!',
             ],
             dmg: 0,
@@ -214,32 +214,12 @@ export const GameProvider = ({ children }) => {
     const [isDead, setIsDead] = useState(false)
     const [isStarted, setIsStarted] = useState(false)
     const [logs, setLogs] = useState([])
+    const [isTransitioning, setIsTransitioning] = useState(false) // เพิ่ม State ใหม่ at phase8
 
     // --- Game Map States ---
     const [pos, setPos] = useState({ x: 0, y: 0 })
     const [discovered, setDiscovered] = useState(new Set(['0,0']))
     const [map, setMap] = useState({}) // ค่าเริ่มต้นว่างเปล่า จะสร้างตอนกด Start
-
-    // สร้างแผนที่จำลอง 4x4 ชั่วคราวเพื่อให้ UI มีข้อมูลไปแสดงผล
-    // const [map, setMap] = useState(() => {
-    //     let dummyMap = {}
-    //     for (let y = 0; y < 4; y++) {
-    //         for (let x = 0; x < 4; x++) {
-    //             dummyMap[`${x},${y}`] = {
-    //                 name:
-    //                     x === 0 && y === 0
-    //                         ? '[ แคปซูลจำศีล ]'
-    //                         : '[ โถงทางเดิน ]',
-    //                 shape:
-    //                     x === 0 && y === 0
-    //                         ? 'w-16 h-16 border-[3px] border-gray-300 text-gray-400 rotate-45 rounded-sm flex items-center justify-center font-bold text-xs'
-    //                         : 'w-20 h-20 border border-dashed border-gray-300 rounded-full',
-    //                 type: 'safe',
-    //             }
-    //         }
-    //     }
-    //     return dummyMap
-    // })
 
     // ฟังก์ชันพื้นฐานสำหรับเพิ่ม Log
     const addLog = (message) => {
@@ -303,7 +283,7 @@ export const GameProvider = ({ children }) => {
 
     // ฟังก์ชันควบคุมการเดิน
     const movePlayer = (dx, dy) => {
-        if (isDead || !isStarted) return // ถ้าตายแล้ว หรือยังไม่เริ่มเกม ห้ามเดิน
+        if (isDead || !isStarted || isTransitioning) return // ถ้าตายแล้ว หรือยังไม่เริ่มเกม ห้ามเดิน // เพิ่มเช็ก isTransitioning at phase8
 
         const tx = pos.x + dx
         const ty = pos.y + dy
@@ -349,15 +329,18 @@ export const GameProvider = ({ children }) => {
                 800,
             )
             setTimeout(() => addLog(outcome.seq[2]), 1600)
+            // phase8 extit elevator(lift)
         } else if (targetRoom.type === 'exit') {
             addLog(
                 <>
                     พบช่องทางลง...{' '}
-                    <span className="font-bold">
-                        (ระบบลงชั้นต่อไป รออัปเดตในเฟสหน้า)
+                    <span className="font-bold text-gray-900">
+                        คุณรีบปีนหนีลงไปชั้นล่าง
                     </span>
                 </>,
             )
+            goToNextLevel() // เรียกใช้ฟังก์ชันเปลี่ยนชั้น
+            return // ออกจากการทำงานทันที
         } else {
             if (targetRoom.name === '[ โถงทางเดิน ]') {
                 const roll = D6()
@@ -391,44 +374,39 @@ export const GameProvider = ({ children }) => {
         setPos({ x: tx, y: ty })
         setDiscovered((prev) => new Set(prev).add(`${tx},${ty}`))
     }
-    // หัก O2 และเช็กว่าตายไหม
-    // setO2((prev) => {
-    //     const newO2 = prev - costMove
-    //     if (newO2 <= 0) {
-    //         setIsDead(true) // สั่งให้สถานะเป็น "ตาย"
-    //         addLog(
-    //             <>
-    //                 ออกซิเจนหมด...{' '}
-    //                 <span className="text-red-600 font-bold">
-    //                     คุณจะหายใจยังไงล่ะทีนี้ 555
-    //                 </span>
-    //             </>,
-    //         )
-    //     }
-    //     return Math.max(0, newO2)
-    // })
 
-    // // อัปเดตพิกัด
-    // setPos({ x: tx, y: ty })
+    // === phase8 add-on here ===
+    // --- ฟังก์ชันลงลิฟต์ไปชั้นต่อไป ---
+    const goToNextLevel = () => {
+        if (isDead || isTransitioning) return
 
-    // // เปิดหมอกใน Minimap (เพิ่มห้องที่เคยเดินผ่าน)
-    // setDiscovered((prev) => {
-    //     const newSet = new Set(prev)
-    //     newSet.add(`${tx},${ty}`)
-    //     return newSet
-    // })
+        setIsTransitioning(true) // เริ่มการเปลี่ยนฉาก
+        const nextLevel = level + 1
 
-    // // ลงบันทึก Log
-    // const targetRoom = map[`${tx},${ty}`]
-    // addLog(
-    //     <>
-    //         เข้าสู่ {targetRoom.name}{' '}
-    //         <span className="text-red-500 font-bold">
-    //             (-{costMove} O<sub>2</sub>)
-    //         </span>
-    //         ,
-    //     </>,
-    // )
+        // หน่วงเวลา 3.5 วินาทีเพื่อให้ผู้เล่นดูหน้าจอ Transition (เหมือนในเวอร์ชัน HTML)
+        setTimeout(() => {
+            setLevel(nextLevel)
+            setPos({ x: 0, y: 0 })
+            setDiscovered(new Set(['0,0']))
+
+            // สร้างแผนที่ใหม่ที่ยากขึ้น (hazardRate จะสูงขึ้นตาม Level ใน generateMap)
+            setMap(generateMap(nextLevel))
+
+            // ฟื้น O2 ให้ 30% เป็นโบนัสที่รอดมาได้ แต่ไม่เกิน 100
+            setO2((prev) => Math.min(100, prev + 30))
+
+            setIsTransitioning(false) // จบการเปลี่ยนฉาก
+            addLog(
+                <>
+                    --- ลงมาถึง{' '}
+                    <span className="font-black text-gray-900">
+                        DECK {nextLevel}
+                    </span>{' '}
+                    ---
+                </>,
+            )
+        }, 3500)
+    }
 
     // รวมข้อมูลและฟังก์ชันที่จะแชร์
     const value = {
@@ -456,6 +434,9 @@ export const GameProvider = ({ children }) => {
         DB,
         generateMap,
         D6,
+        //phase8
+        isTransitioning,
+        goToNextLevel,
     }
 
     return <GameContext.Provider value={value}>{children}</GameContext.Provider>

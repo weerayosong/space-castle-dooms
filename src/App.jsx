@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Stage from './components/Stage'
 import DPad from './components/DPad'
+import TransitionScreen from './components/TransitionScreen'
 
 function App() {
     const {
@@ -86,6 +87,10 @@ function App() {
                     </button>
                 </div>
             )}
+
+            {/* หน้าจอพิเศษต่างๆ */}
+            <TransitionScreen />
+            {/* {isDead && <DeathScreen />} */}
         </div>
     )
 }
