@@ -8,7 +8,7 @@ body,
     margin: 0;
     padding: 0;
     overflow: hidden; /* กันการเลื่อนจอไปมาบนมือถือ */
-    background-color: #f3f4f6; /* สีพื้นหลังนอกกรอบเกม */
+    background-color: #030712; /* สีพื้นหลังนอกกรอบเกม taiwind gray-950 */
 }
 
 /* ตั้งค่าฟอนต์ (แทนที่ tailwind.config.js) */
